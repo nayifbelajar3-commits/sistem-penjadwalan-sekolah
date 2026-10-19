@@ -1,10 +1,63 @@
+<?php
+$pesan = "";
+$status = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nama = htmlspecialchars($_POST['nama']);
+    $ruangan = $_POST['ruangan'];
+    $tanggal = $_POST['tanggal'];
+    $jam_mulai = $_POST['jam_mulai'];
+    $jam_selesai = $_POST['jam_selesai'];
+
+    // Lokasi file JSON untuk menyimpan data
+    $file_json = 'data.json';
+    $data_peminjaman = [];
+
+    if (file_exists($file_json)) {
+        $json_string = file_get_contents($file_json);
+        $data_peminjaman = json_decode($json_string, true) ?: [];
+    }
+
+    // Cek Bentrok (Anti-Collision)
+    $bentrok = false;
+    foreach ($data_peminjaman as $item) {
+        if ($item['ruangan'] == $ruangan && $item['tanggal'] == $tanggal) {
+            // Cek apakah jam bertabrakan
+            if (($jam_mulai < $item['jam_selesai']) && ($jam_selesai > $item['jam_mulai'])) {
+                $bentrok = true;
+                break;
+            }
+        }
+    }
+
+    if ($bentrok) {
+        $pesan = "Maaf, jadwal bentrok! Ruangan $ruangan sudah dipesan pada tanggal dan jam tersebut.";
+        $status = "danger";
+    } else {
+        // Simpan data baru
+        $peminjaman_baru = [
+            'nama' => $nama,
+            'ruangan' => $ruangan,
+            'tanggal' => $tanggal,
+            'jam_mulai' => $jam_mulai,
+            'jam_selesai' => $jam_selesai
+        ];
+        
+        $data_peminjaman[] = $peminjaman_baru;
+        file_put_contents($file_json, json_encode($data_peminjaman, JSON_PRETTY_PRINT));
+
+        $pesan = "Peminjaman berhasil diajukan dan disimpan!";
+        $status = "success";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulir Peminjaman Fasilitas</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -21,10 +74,14 @@
             <div class="col-md-6">
                 <div class="card shadow border-0 p-4">
                     <h3 class="mb-3 text-center text-success">📝 Form Pengajuan Peminjaman</h3>
-                    <p class="text-muted text-center">Isi data di bawah untuk meminjam ruangan sekolah.</p>
-                    <hr>
                     
-                    <form action="#" method="POST">
+                    <?php if (!empty($pesan)): ?>
+                        <div class="alert alert-<?php echo $status; ?>" role="alert">
+                            <?php echo $pesan; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form action="" method="POST">
                         <div class="mb-3">
                             <label for="nama" class="form-label">Nama Peminjam / Guru / Kelas</label>
                             <input type="text" class="form-control" id="nama" name="nama" placeholder="Contoh: Budi (Kelas 8A)" required>
