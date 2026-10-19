@@ -24,7 +24,7 @@
                     <hr>
                     <div class="d-grid gap-2 d-md-block">
                         <a href="kalender.php" class="btn btn-primary btn-lg m-2">📅 Lihat Jadwal Kalender</a>
-                        <a href="#" class="btn btn-success btn-lg m-2">➕ Ajukan Peminjaman</a>
+                        <a href="form-pinjam.php" class="btn btn-success btn-lg m-2">➕ Ajukan Peminjaman</a>
                     </div>
                 </div>
             </div>
