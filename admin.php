@@ -1,4 +1,14 @@
 <?php
+session_start();
+
+// Cek apakah pengguna sudah login dan memiliki role 'admin'
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
+    header('Location: login.php');
+    exit;
+}
+
+$user_login = $_SESSION['user'];
+
 // Membaca data dari data.json
 $file_json = 'data.json';
 $data_peminjaman = [];
@@ -8,7 +18,7 @@ if (file_exists($file_json)) {
     $data_peminjaman = json_decode($json_string, true) ?: [];
 }
 
-// Array nama hari dan bulan
+// Array nama hari dan bulan dalam Bahasa Indonesia
 $nama_hari = [
     'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
     'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
@@ -37,9 +47,13 @@ usort($data_peminjaman, function($a, $b) {
 <body class="bg-light">
 
     <nav class="navbar navbar-dark bg-dark shadow-sm mb-4">
-        <div class="container">
+        <div class="container d-flex justify-content-between align-items-center">
             <a class="navbar-brand fw-bold" href="admin.php">⚙️ Dashboard Pengelola / Admin</a>
-            <a href="index.php" class="btn btn-outline-light btn-sm">🌐 Mode Siswa</a>
+            <div class="d-flex align-items-center text-white gap-3">
+                <span class="small">👨‍💼 Administrator: <strong><?= htmlspecialchars($user_login['nama']); ?></strong></span>
+                <a href="index.php" class="btn btn-outline-light btn-sm">🌐 Mode Siswa</a>
+                <a href="logout.php" class="btn btn-danger btn-sm">Logout 🚪</a>
+            </div>
         </div>
     </nav>
 
