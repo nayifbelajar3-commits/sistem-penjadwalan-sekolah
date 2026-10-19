@@ -1,3 +1,15 @@
+<?php
+session_start();
+
+// Cek apakah pengguna sudah login
+if (!isset($_SESSION['user'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Ambil data pengguna dari sesi
+$user_login = $_SESSION['user'];
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -10,8 +22,12 @@
 
     <!-- Header Navbar -->
     <nav class="navbar navbar-dark bg-success shadow-sm mb-4">
-        <div class="container">
+        <div class="container d-flex justify-content-between align-items-center">
             <a class="navbar-brand fw-bold" href="index.php">🏫 Layanan Peminjaman Fasilitas Sekolah</a>
+            <div class="d-flex align-items-center text-white gap-3">
+                <span class="small">👤 Halo, <strong><?= htmlspecialchars($user_login['nama']); ?></strong></span>
+                <a href="logout.php" class="btn btn-outline-light btn-sm">Logout 🚪</a>
+            </div>
         </div>
     </nav>
 
@@ -28,6 +44,11 @@
                 <a href="form-pinjam.php" class="btn btn-success btn-lg shadow-sm py-3 fw-bold">
                     ➕ Ajukan Peminjaman Ruangan
                 </a>
+                <?php if ($user_login['role'] === 'admin'): ?>
+                    <a href="admin.php" class="btn btn-dark btn-lg shadow-sm py-2 fw-bold mt-2">
+                        ⚙️ Masuk Panel Admin
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
