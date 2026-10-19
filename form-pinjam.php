@@ -1,15 +1,23 @@
 <?php
-$pesan = "";
-$status = "";
+session_start();
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nama = htmlspecialchars($_POST['nama']);
-    $ruangan = $_POST['ruangan'];
-    $tanggal = $_POST['tanggal'];
-    $jam_mulai = $_POST['jam_mulai'];
-    $jam_selesai = $_POST['jam_selesai'];
+// Proteksi Sesi Login
+if (!isset($_SESSION['user'])) {
+    header('Location: login.php');
+    exit;
+}
 
-    // Lokasi file JSON untuk menyimpan data
+$user_login = $_SESSION['user'];
+$error_bentrok = '';
+$sukses = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nama        = trim($_POST['nama'] ?? '');
+    $ruangan     = trim($_POST['ruangan'] ?? '');
+    $tanggal     = trim($_POST['tanggal'] ?? '');
+    $jam_mulai   = trim($_POST['jam_mulai'] ?? '');
+    $jam_selesai = trim($_POST['jam_selesai'] ?? '');
+
     $file_json = 'data.json';
     $data_peminjaman = [];
 
@@ -18,36 +26,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $data_peminjaman = json_decode($json_string, true) ?: [];
     }
 
-    // Cek Bentrok (Anti-Collision)
-    $bentrok = false;
+    // --- LOGIKA CEK BENTROK JADWAL ---
+    $mulai_baru   = strtotime("$tanggal $jam_mulai");
+    $selesai_baru = strtotime("$tanggal $jam_selesai");
+
+    $is_bentrok = false;
+    $peminjam_bentrok = '';
+
     foreach ($data_peminjaman as $item) {
-        if ($item['ruangan'] == $ruangan && $item['tanggal'] == $tanggal) {
-            // Cek apakah jam bertabrakan
-            if (($jam_mulai < $item['jam_selesai']) && ($jam_selesai > $item['jam_mulai'])) {
-                $bentrok = true;
+        // Cek jika ruangan dan tanggal sama
+        if ($item['ruangan'] === $ruangan && $item['tanggal'] === $tanggal) {
+            $mulai_lama   = strtotime($item['tanggal'] . ' ' . $item['jam_mulai']);
+            $selesai_lama = strtotime($item['tanggal'] . ' ' . $item['jam_selesai']);
+
+            // Rumus tumpang tindih waktu (Overlap)
+            if ($mulai_baru < $selesai_lama && $selesai_baru > $mulai_lama) {
+                $is_bentrok = true;
+                $peminjam_bentrok = $item['nama'];
                 break;
             }
         }
     }
 
-    if ($bentrok) {
-        $pesan = "Maaf, jadwal bentrok! Ruangan $ruangan sudah dipesan pada tanggal dan jam tersebut.";
-        $status = "danger";
+    if ($is_bentrok) {
+        $error_bentrok = "⚠️ GAGAL: Ruangan <strong>" . htmlspecialchars($ruangan) . "</strong> sudah dipinjam oleh <strong>" . htmlspecialchars($peminjam_bentrok) . "</strong> pada jam tersebut!";
     } else {
-        // Simpan data baru
-        $peminjaman_baru = [
-            'nama' => $nama,
-            'ruangan' => $ruangan,
-            'tanggal' => $tanggal,
-            'jam_mulai' => $jam_mulai,
-            'jam_selesai' => $jam_selesai
+        // Simpan data jika tidak bentrok
+        $data_peminjaman[] = [
+            'id'          => uniqid(),
+            'nama'        => $nama,
+            'ruangan'     => $ruangan,
+            'tanggal'     => $tanggal,
+            'jam_mulai'   => $jam_mulai,
+            'jam_selesai' => $jam_selesai,
+            'status'      => 'Disetujui'
         ];
-        
-        $data_peminjaman[] = $peminjaman_baru;
-        file_put_contents($file_json, json_encode($data_peminjaman, JSON_PRETTY_PRINT));
 
-        $pesan = "Peminjaman berhasil diajukan dan disimpan!";
-        $status = "success";
+        file_put_contents($file_json, json_encode($data_peminjaman, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $sukses = "🎉 Peminjaman berhasil diajukan dan disimpan!";
     }
 }
 ?>
@@ -57,68 +73,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulir Peminjaman Fasilitas</title>
+    <title>Form Pengajuan Peminjaman</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
+    <!-- Header Navbar -->
     <nav class="navbar navbar-dark bg-success shadow-sm mb-4">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="index.php">🏫 Penjadwalan Sekolah</a>
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold" href="index.php">🏫 Layanan Peminjaman Sekolah</a>
             <a href="index.php" class="btn btn-outline-light btn-sm">⬅ Kembali ke Utama</a>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow border-0 p-4">
-                    <h3 class="mb-3 text-center text-success">📝 Form Pengajuan Peminjaman</h3>
-                    
-                    <?php if (!empty($pesan)): ?>
-                        <div class="alert alert-<?php echo $status; ?>" role="alert">
-                            <?php echo $pesan; ?>
-                        </div>
-                    <?php endif; ?>
+    <div class="container py-3">
+        <div class="card shadow border-0 p-4 mx-auto" style="max-width: 550px; border-radius: 15px;">
+            <h3 class="fw-bold text-center text-success mb-3">📝 Form Pengajuan Peminjaman</h3>
 
-                    <form action="" method="POST">
-                        <div class="mb-3">
-                            <label for="nama" class="form-label">Nama Peminjam / Guru / Kelas</label>
-                            <input type="text" class="form-control" id="nama" name="nama" placeholder="Contoh: Budi (Kelas 8A)" required>
-                        </div>
+            <!-- Pesan Notifikasi Sukses / Bentrok -->
+            <?php if ($error_bentrok): ?>
+                <div class="alert alert-danger shadow-sm mb-3"><?= $error_bentrok; ?></div>
+            <?php endif; ?>
 
-                        <div class="mb-3">
-                            <label for="ruangan" class="form-label">Pilih Ruangan / Fasilitas</label>
-                            <select class="form-select" id="ruangan" name="ruangan" required>
-                                <option value="" selected disabled>-- Pilih Ruangan --</option>
-                                <option value="Lab Komputer">Laboratorium Komputer</option>
-                                <option value="Aula Utama">Aula Utama</option>
-                                <option value="Bilik Sukan">Ruang Serbaguna / Olahraga</option>
-                            </select>
-                        </div>
+            <?php if ($sukses): ?>
+                <div class="alert alert-success shadow-sm mb-3"><?= $sukses; ?></div>
+            <?php endif; ?>
 
-                        <div class="mb-3">
-                            <label for="tanggal" class="form-label">Tanggal Peminjaman</label>
-                            <input type="date" class="form-control" id="tanggal" name="tanggal" required>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="jam_mulai" class="form-label">Jam Mulai</label>
-                                <input type="time" class="form-control" id="jam_mulai" name="jam_mulai" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="jam_selesai" class="form-label">Jam Selesai</label>
-                                <input type="time" class="form-control" id="jam_selesai" name="jam_selesai" required>
-                            </div>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg">Ajukan Peminjaman</button>
-                        </div>
-                    </form>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nama Peminjam / Guru / Kelas</label>
+                    <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($user_login['nama']); ?>" required readonly>
                 </div>
-            </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Pilih Ruangan / Fasilitas</label>
+                    <select name="ruangan" class="form-select" required>
+                        <option value="" disabled selected>-- Pilih Ruangan --</option>
+                        <option value="Laboratorium Komputer">Laboratorium Komputer</option>
+                        <option value="Aula Utama">Aula Utama</option>
+                        <option value="Lapangan Olahraga">Lapangan Olahraga</option>
+                        <option value="Ruang Perpustakaan">Ruang Perpustakaan</option>
+                        <option value="Ruang Multimedia">Ruang Multimedia</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tanggal Peminjaman</label>
+                    <input type="date" name="tanggal" class="form-control" required>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <label class="form-label fw-bold">Jam Mulai</label>
+                        <input type="time" name="jam_mulai" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold">Jam Selesai</label>
+                        <input type="time" name="jam_selesai" class="form-control" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm">
+                    Ajukan Peminjaman
+                </button>
+            </form>
         </div>
     </div>
 
