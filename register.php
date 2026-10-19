@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $users = json_decode(file_get_contents($file_users), true) ?: [];
     }
 
-    // Cek apakah username sudah dipakai
     $username_ada = false;
     foreach ($users as $user) {
         if ($user['username'] === $username) {
@@ -26,9 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($username_ada) {
-        $error = 'Username sudah digunakan, silakan pilih username lain!';
+        $error = 'Username sudah digunakan, pilih username lain!';
     } else {
-        // Tambah akun siswa baru
         $users[] = [
             'username' => $username,
             'password' => $password,
@@ -36,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'role'     => 'siswa'
         ];
 
-        file_put_contents($file_users, json_encode($users, JSON_PRETTY_PRINT));
-        $sukses = 'Pendaftaran berhasil! Silakan login.';
+        file_put_contents($file_users, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $sukses = 'Pendaftaran akun siswa berhasil!';
     }
 }
 ?>
@@ -47,44 +45,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Akun Siswa - Penjadwalan Sekolah</title>
+    <title>Registrasi Akun Siswa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light d-flex align-items-center justify-content-center" style="min-height: 100vh;">
 
-    <div class="card shadow border-0 p-4" style="max-width: 420px; width: 100%; border-radius: 12px;">
-        <h3 class="fw-bold text-center text-success mb-2">📝 Registrasi Siswa</h3>
-        <p class="text-muted text-center small mb-4">Buat akun untuk melakukan peminjaman fasilitas</p>
+    <div class="card shadow-lg border-0 p-4" style="max-width: 440px; width: 100%; border-radius: 16px;">
+        <div class="text-center mb-3">
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold">📝 REGISTRASI SISWA</span>
+            <h3 class="fw-bold text-primary mt-2">Buat Akun Siswa Baru</h3>
+            <p class="text-muted small">Lengkapi data di bawah untuk melakukan peminjaman</p>
+        </div>
 
         <?php if ($error): ?>
-            <div class="alert alert-danger py-2 small mb-3"><?= htmlspecialchars($error); ?></div>
+            <div class="alert alert-danger py-2 small mb-3 text-center"><?= htmlspecialchars($error); ?></div>
         <?php endif; ?>
 
         <?php if ($sukses): ?>
-            <div class="alert alert-success py-2 small mb-3">
-                <?= htmlspecialchars($sukses); ?> <a href="login.php" class="fw-bold">Login di sini</a>
+            <div class="alert alert-success py-2 small mb-3 text-center">
+                <?= htmlspecialchars($sukses); ?><br>
+                <a href="login.php" class="fw-bold text-success text-decoration-none">Klik di sini untuk Login Siswa</a>
             </div>
         <?php endif; ?>
 
         <form method="POST">
             <div class="mb-3">
                 <label class="form-label fw-bold">Nama Lengkap & Kelas</label>
-                <input type="text" name="nama" class="form-control" placeholder="Contoh: Budi (Kelas 8A)" required>
+                <input type="text" name="nama" class="form-control" placeholder="Contoh: Ahmad (Kelas 9A)" required>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Username</label>
-                <input type="text" name="username" class="form-control" placeholder="Masukkan username" required>
+                <input type="text" name="username" class="form-control" placeholder="Buat username" required>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold">Password</label>
-                <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
+                <input type="password" name="password" class="form-control" placeholder="Buat password" required>
             </div>
-            <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm mb-3">Daftar Sekarang</button>
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm mb-3" style="border-radius: 8px;">
+                Daftar Akun Siswa ✨
+            </button>
         </form>
 
         <div class="text-center border-top pt-3">
             <span class="small text-muted">Sudah punya akun? </span>
-            <a href="login.php" class="small fw-bold text-success">Login di sini</a>
+            <a href="login.php" class="small fw-bold text-primary text-decoration-none">Login Siswa</a>
         </div>
     </div>
 
