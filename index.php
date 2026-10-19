@@ -20,7 +20,6 @@
             <p class="lead text-muted mb-4">Gunakan sistem ini untuk mengecek ketersediaan ruangan dan menghindari jadwal bentrok secara online.</p>
             
             <div class="d-flex justify-content-center gap-3">
-                <!-- Dipastikan mengarah ke kalendar.php dan form-pinjam.php -->
                 <a href="kalendar.php" class="btn btn-primary btn-lg shadow-sm">📅 Lihat Jadwal Kalender</a>
                 <a href="form-pinjam.php" class="btn btn-success btn-lg shadow-sm">➕ Ajukan Peminjaman</a>
             </div>
