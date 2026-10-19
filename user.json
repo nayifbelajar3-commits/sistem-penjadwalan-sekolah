@@ -1,0 +1,14 @@
+[
+    {
+        "username": "admin",
+        "password": "admin123",
+        "nama": "Administrator Sekolah",
+        "role": "admin"
+    },
+    {
+        "username": "siswa1",
+        "password": "siswa123",
+        "nama": "Nayif (Kelas 9B)",
+        "role": "siswa"
+    }
+]
