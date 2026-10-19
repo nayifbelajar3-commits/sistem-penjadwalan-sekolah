@@ -66,8 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </form>
 
+        <!-- TAUTAN REGISTRASI ADMIN BARU -->
         <div class="text-center border-top border-secondary pt-3 mt-2">
-            <a href="login.php" class="small text-light text-decoration-none">⬅ Kembali ke Portal Siswa</a>
+            <span class="small text-light opacity-75">Belum punya akun admin? </span>
+            <a href="register-admin.php" class="small fw-bold text-warning text-decoration-none">Registrasi Admin Baru</a>
+        </div>
+
+        <div class="text-center mt-2">
+            <a href="login.php" class="small text-light text-decoration-none opacity-75">⬅ Kembali ke Portal Siswa</a>
         </div>
     </div>
 
