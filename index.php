@@ -3,26 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Penjadwalan Fasilitas</title>
+    <title>Sistem Penjadwalan Sekolah - Siswa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
-    <nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-dark bg-success shadow-sm mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.php">🏫 Penjadwalan Fasilitas SMP</a>
+            <a class="navbar-brand fw-bold" href="index.php">🏫 Layanan Peminjaman Fasilitas Sekolah</a>
         </div>
     </nav>
 
-    <div class="container text-center mt-5">
-        <div class="card shadow border-0 p-5">
-            <h1 class="display-5 fw-bold text-dark mb-3">Selamat Datang di Sistem Peminjaman Ruangan</h1>
-            <p class="lead text-muted mb-4">Gunakan sistem ini untuk mengecek ketersediaan ruangan dan menghindari jadwal bentrok secara online.</p>
+    <!-- Main Content -->
+    <div class="container text-center py-5">
+        <div class="card shadow border-0 p-5 mx-auto" style="max-width: 600px; border-radius: 15px;">
+            <h2 class="fw-bold mb-3 text-success">Menu Peminjaman Ruangan</h2>
+            <p class="text-muted mb-4">Silakan cek ketersediaan ruangan pada kalender sebelum mengajukan peminjaman fasilitas sekolah.</p>
             
-            <div class="d-flex justify-content-center gap-3">
-                <!-- Disesuaikan ke kalender.php (pakai e) dan form-pinjam.php -->
-                <a href="kalender.php" class="btn btn-primary btn-lg shadow-sm">📅 Lihat Jadwal Kalender</a>
-                <a href="form-pinjam.php" class="btn btn-success btn-lg shadow-sm">➕ Ajukan Peminjaman</a>
+            <div class="d-grid gap-3 col-11 mx-auto">
+                <a href="kalender.php" class="btn btn-primary btn-lg shadow-sm py-3 fw-bold">
+                    📅 Lihat Jadwal Kalender
+                </a>
+                <a href="form-pinjam.php" class="btn btn-success btn-lg shadow-sm py-3 fw-bold">
+                    ➕ Ajukan Peminjaman Ruangan
+                </a>
             </div>
         </div>
     </div>
