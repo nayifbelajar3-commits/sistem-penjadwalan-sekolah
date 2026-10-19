@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data_peminjaman = json_decode($json_string, true) ?: [];
     }
 
-    // --- LOGIKA CEK BENTROK JADWAL ---
+    // --- LOGIKA CEK BENTROK JADWAL YANG KETAT ---
     $mulai_baru   = strtotime("$tanggal $jam_mulai");
     $selesai_baru = strtotime("$tanggal $jam_selesai");
 
@@ -34,12 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $peminjam_bentrok = '';
 
     foreach ($data_peminjaman as $item) {
-        // Cek jika ruangan dan tanggal sama
-        if ($item['ruangan'] === $ruangan && $item['tanggal'] === $tanggal) {
+        // Abaikan jika data dibatalkan/ditolak (jika ada sistem status)
+        $status_item = $item['status'] ?? 'Disetujui';
+        if ($status_item === 'Ditolak') {
+            continue;
+        }
+
+        // Cek jika ruangan dan tanggal persis sama
+        if (trim($item['ruangan']) === trim($ruangan) && trim($item['tanggal']) === trim($tanggal)) {
             $mulai_lama   = strtotime($item['tanggal'] . ' ' . $item['jam_mulai']);
             $selesai_lama = strtotime($item['tanggal'] . ' ' . $item['jam_selesai']);
 
-            // Rumus tumpang tindih waktu (Overlap)
+            // Rumus tumpang tindih waktu (Overlap) yang akurat:
+            // (Mulai Baru < Selesai Lama) DAN (Selesai Baru > Mulai Lama)
             if ($mulai_baru < $selesai_lama && $selesai_baru > $mulai_lama) {
                 $is_bentrok = true;
                 $peminjam_bentrok = $item['nama'];
@@ -49,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($is_bentrok) {
-        $error_bentrok = "⚠️ GAGAL: Ruangan <strong>" . htmlspecialchars($ruangan) . "</strong> sudah dipinjam oleh <strong>" . htmlspecialchars($peminjam_bentrok) . "</strong> pada jam tersebut!";
+        $error_bentrok = "⚠️ <strong>JADWAL BENTROK!</strong> Ruangan <strong>" . htmlspecialchars($ruangan) . "</strong> pada tanggal tersebut sudah dipinjam oleh <strong>" . htmlspecialchars($peminjam_bentrok) . "</strong> pada rentang jam yang bersinggungan.";
     } else {
-        // Simpan data jika tidak bentrok
+        // Simpan data baru ke array
         $data_peminjaman[] = [
             'id'          => uniqid(),
             'nama'        => $nama,
@@ -62,8 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'status'      => 'Disetujui'
         ];
 
+        // Simpan kembali ke data.json dengan rapi
         file_put_contents($file_json, json_encode($data_peminjaman, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        $sukses = "🎉 Peminjaman berhasil diajukan dan disimpan!";
+        $sukses = "🎉 Peminjaman berhasil diajukan dan jadwal disetujui tanpa bentrok!";
     }
 }
 ?>
