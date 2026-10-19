@@ -1,3 +1,24 @@
+<?php
+// Membaca data jadwal dari file JSON
+$file_json = 'data.json';
+$events = [];
+
+if (file_exists($file_json)) {
+    $json_string = file_get_contents($file_json);
+    $data_peminjaman = json_decode($json_string, true) ?: [];
+
+    // Format data agar sesuai dengan format FullCalendar.js
+    foreach ($data_peminjaman as $item) {
+        $events[] = [
+            'title' => $item['ruangan'] . ' (' . $item['nama'] . ')',
+            'start' => $item['tanggal'] . 'T' . $item['jam_mulai'],
+            'end'   => $item['tanggal'] . 'T' . $item['jam_selesai'],
+            'color' => '#0d6efd'
+        ];
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -22,7 +43,7 @@
         <div class="card shadow border-0 p-4">
             <h3 class="mb-3 text-center text-primary">📅 Jadwal Penggunaan Ruangan & Fasilitas</h3>
             <hr>
-            <!-- Tempat Kalendar Ditampilkan -->
+            <!-- Tempat Kalender Ditampilkan -->
             <div id="calendar"></div>
         </div>
     </div>
@@ -38,20 +59,8 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek'
           },
-          events: [
-            {
-              title: 'Laboratorium Komputer (Kelas 8A)',
-              start: '2026-10-20T08:00:00',
-              end: '2026-10-20T10:00:00',
-              color: '#dc3545'
-            },
-            {
-              title: 'Aula Utama (Rapat Guru)',
-              start: '2026-10-22T13:00:00',
-              end: '2026-10-22T15:00:00',
-              color: '#0d6efd'
-            }
-          ]
+          // Mengambil data dinamis yang dibaca PHP dari data.json
+          events: <?php echo json_encode($events); ?>
         });
         calendar.render();
       });
