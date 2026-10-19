@@ -63,8 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label fw-bold">Password</label>
                 <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
             </div>
-            <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm">Masuk</button>
+            <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm mb-3">Masuk</button>
         </form>
+
+        <!-- LINK PENDAFTARAN (REGISTER) -->
+        <div class="text-center border-top pt-3">
+            <span class="small text-muted">Belum punya akun? </span>
+            <a href="register.php" class="small fw-bold text-success text-decoration-none">Daftar Akun Siswa</a>
+        </div>
     </div>
 
 </body>
